@@ -18,13 +18,17 @@ else()
   target_compile_options(schemasync_warnings INTERFACE -Wall -Wextra -Wpedantic $<$<BOOL:${SCHEMASYNC_WERROR}>:-Werror>)
 endif()
 
+add_library(schemasync_core STATIC src/db.cpp)
+target_include_directories(schemasync_core PUBLIC src)
+target_link_libraries(schemasync_core PUBLIC PostgreSQL::PostgreSQL PRIVATE schemasync_warnings)
+
 add_executable(schemasync src/main.cpp)
-target_link_libraries(schemasync PRIVATE schemasync_warnings CLI11::CLI11)
+target_link_libraries(schemasync PRIVATE schemasync_warnings schemasync_core CLI11::CLI11)
 
 enable_testing()
-add_executable(schemasync_tests tests/unit_parse.cpp)
+add_executable(schemasync_tests tests/unit_parse.cpp tests/integration_db.cpp)
 target_link_libraries(schemasync_tests PRIVATE
-  schemasync_warnings pg_query nlohmann_json::nlohmann_json GTest::gtest_main)
+  schemasync_warnings schemasync_core pg_query nlohmann_json::nlohmann_json GTest::gtest_main)
 target_compile_definitions(schemasync_tests PRIVATE SCHEMASYNC_FIXTURES="${CMAKE_SOURCE_DIR}/tests/fixtures")
 include(GoogleTest)
 gtest_discover_tests(schemasync_tests)

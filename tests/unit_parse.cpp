@@ -22,7 +22,7 @@ TEST(LibPgQuery, CreateTableAstMatchesGolden) {
     const std::string golden = SCHEMASYNC_FIXTURES "/ast/create_table.json";
 
     if (std::getenv("SCHEMASYNC_UPDATE_GOLDEN")) {
-        std::ofstream(golden) << ast.dump(2) << '\n';
+        std::ofstream(golden, std::ios::binary) << ast.dump(2) << '\n';
     }
     std::ifstream in(golden);
     ASSERT_TRUE(in) << "missing " << golden << ", run with SCHEMASYNC_UPDATE_GOLDEN=1";

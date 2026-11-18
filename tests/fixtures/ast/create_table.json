@@ -1,0 +1,51 @@
+{
+  "stmts": [
+    {
+      "stmt": {
+        "CreateStmt": {
+          "oncommit": "ONCOMMIT_NOOP",
+          "relation": {
+            "inh": true,
+            "location": 13,
+            "relname": "t",
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY",
+                      "location": 22
+                    }
+                  }
+                ],
+                "is_local": true,
+                "location": 15,
+                "typeName": {
+                  "location": 18,
+                  "names": [
+                    {
+                      "String": {
+                        "sval": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "sval": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "version": 180004
+}

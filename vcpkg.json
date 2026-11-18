@@ -1,0 +1,12 @@
+{
+  "name": "schemasync",
+  "version": "0.1.0",
+  "builtin-baseline": "2ebb714221ad4e482e596d64c129f63fbbfb3fd5",
+  "dependencies": [
+    { "name": "libpq", "default-features": false },
+    "libpg-query",
+    "cli11",
+    "nlohmann-json",
+    "gtest"
+  ]
+}

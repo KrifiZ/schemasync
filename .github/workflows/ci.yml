@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.compiler }} / PostgreSQL ${{ matrix.postgres }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: [16, 17, 18]
+        compiler: [gcc, clang]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SCHEMASYNC_TEST_DSN: host=localhost port=5432 user=postgres password=postgres dbname=postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev ninja-build
+      - name: Select compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = gcc ]; then
+            echo "CC=gcc-14" >> "$GITHUB_ENV"; echo "CXX=g++-14" >> "$GITHUB_ENV"
+          else
+            echo "CC=clang-18" >> "$GITHUB_ENV"; echo "CXX=clang++-18" >> "$GITHUB_ENV"
+          fi
+      - run: cmake --preset linux-debug -DSCHEMASYNC_WERROR=ON
+      - run: cmake --build ~/build/schemasync/linux-debug
+      - run: ctest --test-dir ~/build/schemasync/linux-debug --output-on-failure
+
+  sanitizers:
+    name: ASan + UBSan / PostgreSQL 18
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SCHEMASYNC_TEST_DSN: host=localhost port=5432 user=postgres password=postgres dbname=postgres
+      CC: gcc-14
+      CXX: g++-14
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev ninja-build
+      - run: cmake --preset linux-asan -DSCHEMASYNC_WERROR=ON
+      - run: cmake --build ~/build/schemasync/linux-asan
+      - run: ctest --test-dir ~/build/schemasync/linux-asan --output-on-failure
+
+  windows:
+    name: Windows MSVC (unit tests)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\vcpkg\archives
+          key: vcpkg-${{ hashFiles('vcpkg.json') }}
+      - name: Set up vcpkg
+        run: |
+          git clone --quiet https://github.com/microsoft/vcpkg "$env:RUNNER_TEMP\vcpkg"
+          & "$env:RUNNER_TEMP\vcpkg\bootstrap-vcpkg.bat" -disableMetrics
+          "VCPKG_ROOT=$env:RUNNER_TEMP\vcpkg" >> $env:GITHUB_ENV
+      - run: cmake --preset x64-debug -DSCHEMASYNC_WERROR=ON
+      - run: cmake --build out/build/x64-debug
+      - run: ctest --test-dir out/build/x64-debug --output-on-failure

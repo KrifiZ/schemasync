@@ -1,0 +1,21 @@
+CREATE TABLE everything (
+    a smallint,
+    b integer,
+    c bigint,
+    d numeric(12,4),
+    e numeric,
+    f real,
+    g double precision,
+    h text,
+    i varchar(40),
+    j char(3),
+    k boolean,
+    l date,
+    m timestamp,
+    n timestamptz,
+    o timestamp(3) with time zone,
+    p uuid,
+    q jsonb DEFAULT '{}',
+    r text[] DEFAULT '{}',
+    s integer[]
+);

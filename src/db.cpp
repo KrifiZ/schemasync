@@ -18,7 +18,7 @@ Result<Rows> check(PGconn* conn, PGresult* raw) {
     if (!res) return std::unexpected(Error{ErrorKind::db, trimmed(PQerrorMessage(conn))});
 
     const auto status = PQresultStatus(res.get());
-    if (status == PGRES_COMMAND_OK || status == PGRES_TUPLES_OK) return Rows(std::move(res));
+    if (status == PGRES_COMMAND_OK || status == PGRES_TUPLES_OK || status == PGRES_EMPTY_QUERY) return Rows(std::move(res));
 
     const char* sqlstate = PQresultErrorField(res.get(), PG_DIAG_SQLSTATE);
     return std::unexpected(Error{ErrorKind::db, trimmed(PQresultErrorMessage(res.get())), sqlstate ? sqlstate : ""});

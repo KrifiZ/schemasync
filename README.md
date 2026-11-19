@@ -144,7 +144,7 @@ transactional, the plan is atomic: it either fully applies or leaves the databas
 
 ## Building
 
-Requirements: CMake 3.25+, a C++23 compiler (GCC 14+, Clang 18+, MSVC 19.40+), Ninja and libpq.
+Requirements: CMake 3.25+, a C++23 compiler (GCC 14+, Clang 19+, MSVC 19.40+), Ninja and libpq.
 CLI11, nlohmann/json, GoogleTest and libpg_query 18.1.0 are fetched and built by CMake.
 
 ```sh
